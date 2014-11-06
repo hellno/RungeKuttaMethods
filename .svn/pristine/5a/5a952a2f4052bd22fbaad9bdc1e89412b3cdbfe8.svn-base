@@ -1,0 +1,180 @@
+package jpp.rungekutta;
+
+import java.util.*;
+import java.lang.Math.*;
+
+public class RungeKutta {
+	
+	double mu_mars;
+	
+	RungeKutta(){
+		mu_mars = calcMU(1, 3.23*Math.pow(10.0,-7.0), 2.959122*Math.pow(10.0,-4.0));
+	}
+	
+	public double[] dglAcceleration(double[] position, double[] velocity, double interval){
+		//	Calculates the delta value for the speed from the given differential equation
+		double[] position_next = { position[0] - interval * velocity[0], 
+									position[1] - interval * velocity[1],
+									position[2] - interval * velocity[2]
+								};
+		double[] acceleration = dotProduct(position, -mu_mars / Math.pow(vectorNorm(position), 3)) ;
+//		System.out.println("calc dglAcceleration with interval: "+ interval + 
+//							"pos: (" + position[0] + "," + position[1] + "," + position[2] + ")" +  
+//							"vel: (" + velocity[0] + "," + velocity[1] + "," + velocity[2] + ")");
+		return acceleration;
+	
+	}
+	
+	public double[] rungeKuttaVelocity(double[] position, double[] velocity, double interval){
+	//	Calculates the Runge-Kutta Approximation of the velocity.
+	//	return the new speed
+	
+		double[] f1 = dotProduct(dglAcceleration(position, velocity, interval), interval);
+		
+		double[] f2_param = addVector(velocity, dotProduct(f1, 0.25));
+		double[] f2 = dotProduct(dglAcceleration(position, f2_param, interval + interval/4.0), interval);
+		
+		double[] f3_param = addVector(velocity, dotProduct(f1, 0.125), dotProduct(f2, 0.125));
+		double[] f3 = dotProduct(dglAcceleration(position, f3_param, interval + interval/4.0), interval);
+		
+		double[] f4_param = addVector(velocity, dotProduct(f2, -0.5), f3);
+		double[] f4 = dotProduct(dglAcceleration(position, f4_param, interval + interval/2.0), interval);
+		
+		double[] f5_param = addVector(velocity, dotProduct(f1, 3.0/16.0), dotProduct(f4, 9.0/16.0));
+		double[] f5 = dotProduct(dglAcceleration(position, f5_param, interval + 3.0 * interval / 4.0), interval);
+		
+		double[] f6_param = addVector(velocity, dotProduct(f1, -3.0/7.0), dotProduct(f2, 2.0/7.0),dotProduct(f3, 12.0/7.0), dotProduct(f4, -12.0/7.0), dotProduct(f5, 8.0/7.0));
+		double[] f6 = dotProduct(dglAcceleration(position, f6_param, interval), interval);
+		
+		double dy[] = calcDY(f1, f2, f3, f4, f5, f6);
+		
+		double[] result = addVector(velocity, dy);
+		
+		return result;
+	}
+	
+
+	public double[] rungeKuttaPosition(double[] position, double[] velocity, double interval){
+	//	Calculates the Runge-Kutta Approximation of the Position.
+	//	return the new position
+		
+		double[] f1 = dotProduct(rungeKuttaVelocity(position, velocity, interval), interval);
+		
+		double[] f2_param = addVector(position, dotProduct(f1, 0.25));
+		double[] f2 = dotProduct(rungeKuttaVelocity(f2_param, velocity, interval + interval/4.0), interval);
+		
+		double[] f3_param = addVector(position, dotProduct(f1, 0.125), dotProduct(f2, 0.125));
+		double[] f3 = dotProduct(rungeKuttaVelocity(f3_param, velocity, interval + interval/4.0), interval);
+		
+		double[] f4_param = addVector(position, dotProduct(f2, -0.5), f3);
+		double[] f4 = dotProduct(rungeKuttaVelocity(f4_param, velocity, interval + interval/2.0), interval);
+		
+		double[] f5_param = addVector(position, dotProduct(f1, 3.0/16.0), dotProduct(f4, 9.0/16.0));
+		double[] f5 = dotProduct(rungeKuttaVelocity(f5_param, velocity, interval + 3.0 * interval / 4.0), interval);
+		
+		double[] f6_param = addVector(position, dotProduct(f1, -3.0/7.0), dotProduct(f2, 2.0/7.0),dotProduct(f3, 12.0/7.0), dotProduct(f4, -12.0/7.0), dotProduct(f5, 8.0/7.0));
+		double[] f6 = dotProduct(rungeKuttaVelocity(f6_param, velocity, interval), interval);
+		
+		double dy[] = calcDY(f1, f2, f3, f4, f5, f6);
+		
+		double[] result = addVector(position, dy);
+		
+		return result;
+	}
+	public static void main (String[] args){
+		
+	//	Create a main function that runs the Runge Kutta 5 method for 720 time units
+	//	Use a interval of h=5 and  
+	//	Update position and velocity in every step and always update the position first!
+	//	At the beginning and after every step print the current position to the console in the format "r[0];r[1];r[2]" (the double values seperated by semi colons). 
+	//	Format every double output to have exactly 4 fraction digits. Use NumberFormat or DecimalFormat to accomplish this task.
+		
+		RungeKutta rk = new RungeKutta();
+		
+		double[] r_0 = { -0.8888462, 1.2418782, 0.5936583 };
+		double[] v_0 = { -0.01122165, -0.00593450, -0.00241817 };
+		double interval = 5;
+		double[] new_pos = r_0;
+		double[] new_vel = v_0;
+		
+		//System.out.println("start:");
+		//rk.printPosAndVel(new_pos, new_vel);
+		
+		for(int i=0; i <= 720; i++){
+			new_pos = rk.rungeKuttaPosition(new_pos, new_vel, interval);
+			new_vel = rk.rungeKuttaVelocity(new_pos, new_vel, interval);
+			
+			//System.out.println("step " + i);
+			//rk.printPosAndVel(new_pos, new_vel);
+			rk.printVector(new_pos);
+		}
+	}
+	
+	public double[] calcDY(double[] f1, double[] f2, double[] f3, double[] f4, double[] f5, double[] f6) {
+		double[] temp = dotProduct(
+							addVector(dotProduct(f1, 7.0), dotProduct(f3, 32.0), dotProduct(f4, 12.0), dotProduct(f5, 32.0), dotProduct(f6, 7.0)),
+							1.0/90.0);
+		
+		return temp;
+	}
+	
+	public double calcMU(double m1, double m2, double G){
+		
+		double mu = -G * (m1 + m2);
+		return mu;
+	}
+	
+	public double vectorNorm(double[] vector){
+		return Math.sqrt(Math.pow(vector[0],2.0) + Math.pow(vector[1],2.0) + Math.pow(vector[2],2.0));
+	}
+	
+	public double[] dotProduct(double[] vector, double value){
+		double[] temp = { vector[0] * value,	
+							vector[1] * value,
+							vector[2] * value
+						};
+		
+		return temp;
+		
+	}
+	
+	public double[] addVector(double[] v1, double[] v2){
+		double[] sum =  {v1[0] + v2[0],
+							v1[1] + v2[1],
+							v1[2] + v2[2]
+						};
+		
+		return sum;
+	}
+	
+	public double[] addVector(double[] v1, double[] v2, double[] v3){
+		double[] sum = addVector(addVector(v1, v2), v3);
+		return sum;
+	}
+	
+	public double[] addVector(double[] v1, double[] v2, double[] v3, double[] v4, double[] v5){
+		double[] sum = addVector(addVector(v1, v2, v3), addVector(v4, v5));
+		return sum;
+	}
+	
+	public double[] addVector(double[] v1, double[] v2, double[] v3, double[] v4, double[] v5, double[] v6){
+		double[] sum = addVector(addVector(v1, v2, v3), addVector(v4, v5, v6));
+		return sum;
+	}
+	
+	public double[] subtractVector(double[] v1, double[] v2){
+		return addVector(v1, dotProduct(v2, -1.0));
+	}
+	
+	public void printVector(double[] vector){
+		System.out.printf("%.4f,%.4f,%.4f\n", vector[0], vector[1], vector[2]);
+	}
+	
+	public void printPosAndVel(double[] position, double[] velocity){
+		System.out.printf("Pos: (%.4f | %.4f | %.4f)\n", position[0], position[1], position[2]);
+		System.out.printf("Vel: (%.4f | %.4f | %.4f)\n", velocity[0], velocity[1], velocity[2]);
+		
+	}
+}
+
+
