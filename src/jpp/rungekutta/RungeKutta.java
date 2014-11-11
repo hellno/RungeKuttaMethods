@@ -43,33 +43,29 @@ public class RungeKutta {
 	 */
 	public double[] rungeKuttaVelocity(double[] position, double[] velocity,
 			double interval) {
-		double[] f1 = scalarProduct(
-				dglAcceleration(position, velocity, 0), interval);
+		double[] f1 = scalarProduct(dglAcceleration(position, velocity, 0),
+				interval);
 		double[] f2_param = addVector(velocity, scalarProduct(f1, 1.0 / 4.0));
 		double[] f2 = scalarProduct(
-				dglAcceleration(position, f2_param, (interval / 4.0)),
-				interval);
+				dglAcceleration(position, f2_param, (interval / 4.0)), interval);
 		double[] f3_param = addVector(velocity, scalarProduct(f2, 1.0 / 8.0),
 				scalarProduct(f1, 1.0 / 8.0));
 		double[] f3 = scalarProduct(
-				dglAcceleration(position, f3_param, (interval / 4.0)),
-				interval);
+				dglAcceleration(position, f3_param, (interval / 4.0)), interval);
 		double[] f4_param = addVector(velocity, scalarProduct(f2, -1.0 / 2.0),
 				f3);
 		double[] f4 = scalarProduct(
-				dglAcceleration(position, f4_param, (interval / 2.0)),
-				interval);
+				dglAcceleration(position, f4_param, (interval / 2.0)), interval);
 		double[] f5_param = addVector(velocity, scalarProduct(f1, 3.0 / 16.0),
 				scalarProduct(f4, 9.0 / 16.0));
 		double[] f5 = scalarProduct(
-				dglAcceleration(position, f5_param, (interval * 3.0
-						/ 4.0)), interval);
+				dglAcceleration(position, f5_param, (interval * 3.0 / 4.0)),
+				interval);
 		double[] f6_param = addVector(velocity, scalarProduct(f1, -3.0 / 7.0),
 				scalarProduct(f2, 2.0 / 7.0), scalarProduct(f3, 12.0 / 7.0),
 				scalarProduct(f4, -12.0 / 7.0), scalarProduct(f5, 8.0 / 7.0));
 		double[] f6 = scalarProduct(
-				dglAcceleration(position, f6_param, interval),
-				interval);
+				dglAcceleration(position, f6_param, interval), interval);
 		double[] dY = calculateDY(f1, f3, f4, f5, f6);
 		double[] result = addVector(velocity, dY);
 		return result;
@@ -95,7 +91,35 @@ public class RungeKutta {
 	 */
 	public double[] rungeKuttaPosition(double[] position, double[] velocity,
 			double interval) {
-		return null;
+		double[] f1 = scalarProduct(rungeKuttaVelocity(position, velocity, 0),
+				interval);
+		double[] f2_param = addVector(position, scalarProduct(f1, 1.0 / 4.0));
+		double[] f2 = scalarProduct(
+				rungeKuttaVelocity(f2_param, velocity, (interval / 4.0)),
+				interval);
+		double[] f3_param = addVector(position, scalarProduct(f2, 1.0 / 8.0),
+				scalarProduct(f1, 1.0 / 8.0));
+		double[] f3 = scalarProduct(
+				rungeKuttaVelocity(f3_param, velocity, (interval / 4.0)),
+				interval);
+		double[] f4_param = addVector(position, scalarProduct(f2, -1.0 / 2.0),
+				f3);
+		double[] f4 = scalarProduct(
+				rungeKuttaVelocity(f4_param, velocity, (interval / 2.0)),
+				interval);
+		double[] f5_param = addVector(position, scalarProduct(f1, 3.0 / 16.0),
+				scalarProduct(f4, 9.0 / 16.0));
+		double[] f5 = scalarProduct(
+				rungeKuttaVelocity(f5_param, velocity, (interval * 3.0 / 4.0)),
+				interval);
+		double[] f6_param = addVector(position, scalarProduct(f1, -3.0 / 7.0),
+				scalarProduct(f2, 2.0 / 7.0), scalarProduct(f3, 12.0 / 7.0),
+				scalarProduct(f4, -12.0 / 7.0), scalarProduct(f5, 8.0 / 7.0));
+		double[] f6 = scalarProduct(
+				rungeKuttaVelocity(f6_param, velocity, interval), interval);
+		double[] dY = calculateDY(f1, f3, f4, f5, f6);
+		double[] result = addVector(position, dY);
+		return result;
 	}
 
 	/**
@@ -163,20 +187,40 @@ public class RungeKutta {
 
 	/**
 	 * 
+	 * @param vector
+	 */
+	public void printVector(double[] vector) {
+		System.out.printf("%.4f,%.4f,%.4f\n", vector[0], vector[1], vector[2]);
+	}
+
+	/**
+	 * 
+	 * @param position
+	 * @param velocity
+	 */
+	public void printPosAndVel(double[] position, double[] velocity) {
+		System.out.printf("Pos: (%.4f | %.4f | %.4f)\n", position[0],
+				position[1], position[2]);
+		System.out.printf("Vel: (%.4f | %.4f | %.4f)\n", velocity[0],
+				velocity[1], velocity[2]);
+	}
+
+	/**
+	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		double[] v1 = { 1, 2, 3 };
-		double[] v2 = { 3, 4, 5 };
-		double[] v3 = { 3, 4, 10 };
-		double s = 100;
 		RungeKutta rk = new RungeKutta();
-		double[] res = rk.addVector(v1, v2, v3);
-		double[] sk = rk.scalarProduct(v1, s);
-		double a = 3.0 / 4.0;
-		System.out.println(a);
-		for (int i = 0; i < res.length; i++) {
-			System.out.println(res[i]);
+		double[] r0 = { -0.8888462, 1.2418782, 0.5936583 };
+		double[] v0 = { -0.01122165, -0.00593450, -0.00241817 };
+		double interval = 5.0;
+		double[] newPos = r0;
+		double[] newVel = v0;
+		rk.printVector(r0);
+		for (int i = 0; i < 720; i++) {
+			newPos = rk.rungeKuttaPosition(newPos, newVel, interval);
+			newVel = rk.rungeKuttaVelocity(newPos, newVel, interval);
+			rk.printVector(newPos);
 		}
 	}
 
