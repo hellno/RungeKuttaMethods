@@ -15,6 +15,10 @@ public class RungeKutta {
 		double[] position_next = subtractVector(position, dotProduct(velocity, interval));
 		
 		double[] acceleration = dotProduct(position_next, -mu_mars / Math.pow(vectorNorm(position), 3.0)) ;
+
+//		System.out.println("calc dglAcceleration with interval: "+ interval + 
+//							"pos: (" + position[0] + "," + position[1] + "," + position[2] + ")" +  
+//							"vel: (" + velocity[0] + "," + velocity[1] + "," + velocity[2] + ")");
 		
 		return acceleration;
 	
@@ -94,8 +98,8 @@ public class RungeKutta {
 		double[] new_vel = v_0;
 		
 		//System.out.println("start:");
-		//rk.printPosAndVel(new_pos, new_vel);
-		//System.out.println("norm of pos: " + rk.vectorNorm(new_pos));
+		rk.printPosAndVel(new_pos, new_vel);
+		System.out.println("norm of pos: " + rk.vectorNorm(new_pos));
 		
 		rk.printVector(r_0);
 		for(int i=0; i < 720; i++){
