@@ -17,6 +17,10 @@ public class RungeKutta {
 		double length = vectorNorm(position_next);
 		double[] acceleration = dotProduct(position_next, mu_mars / (length * length * length)) ;
 		
+//		double[] tempVal = { velocity[0] * interval,velocity[1] * interval, velocity[2] * interval}; 
+//		double[] position_next = { position[0] - tempVal[0], position[1] - tempVal[1], position[2] - tempVal[2] };
+//		double length = Math.sqrt()
+		
 		return acceleration;
 	
 	}
@@ -28,16 +32,16 @@ public class RungeKutta {
 		double[] f1 = dotProduct(dglAcceleration(position, velocity, 0), interval);
 		
 		double[] f2_param = addVector(velocity, dotProduct(f1, 1.0 / 4.0));
-		double[] f2 = dotProduct(dglAcceleration(position, f2_param, interval/4.0), interval);
+		double[] f2 = dotProduct(dglAcceleration(position, f2_param, interval + interval/4.0), interval);
 		
-		double[] f3_param = addVector(velocity, dotProduct(f1, 0.125), dotProduct(f2, 0.125));
-		double[] f3 = dotProduct(dglAcceleration(position, f3_param, interval/4.0), interval);
+		double[] f3_param = addVector(velocity, dotProduct(f1, 1.0 / 8.0), dotProduct(f2, 1.0 / 8.0));
+		double[] f3 = dotProduct(dglAcceleration(position, f3_param, interval + interval/4.0), interval);
 		
-		double[] f4_param = addVector(velocity, dotProduct(f2, -0.5), f3);
-		double[] f4 = dotProduct(dglAcceleration(position, f4_param, interval/2.0), interval);
+		double[] f4_param = addVector(velocity, dotProduct(f2, -1.0 / 2.0), f3);
+		double[] f4 = dotProduct(dglAcceleration(position, f4_param, interval + interval/2.0), interval);
 		
 		double[] f5_param = addVector(velocity, dotProduct(f1, 3.0/16.0), dotProduct(f4, 9.0/16.0));
-		double[] f5 = dotProduct(dglAcceleration(position, f5_param, interval * 3.0 / 4.0), interval);
+		double[] f5 = dotProduct(dglAcceleration(position, f5_param, interval + interval * 3.0 / 4.0), interval);
 		
 		double[] f6_param = addVector(velocity, dotProduct(f1, -3.0/7.0), dotProduct(f2, 2.0/7.0),dotProduct(f3, 12.0/7.0), dotProduct(f4, -12.0/7.0), dotProduct(f5, 8.0/7.0));
 		double[] f6 = dotProduct(dglAcceleration(position, f6_param, interval), interval);
@@ -57,16 +61,16 @@ public class RungeKutta {
 		double[] f1 = dotProduct(rungeKuttaVelocity(position, velocity, 0), interval);
 		
 		double[] f2_param = addVector(position, dotProduct(f1, 0.25));
-		double[] f2 = dotProduct(rungeKuttaVelocity(f2_param, velocity, interval/4.0), interval);
+		double[] f2 = dotProduct(rungeKuttaVelocity(f2_param, velocity, interval + interval/4.0), interval);
 		
 		double[] f3_param = addVector(position, dotProduct(f1, 0.125), dotProduct(f2, 0.125));
-		double[] f3 = dotProduct(rungeKuttaVelocity(f3_param, velocity, interval/4.0), interval);
+		double[] f3 = dotProduct(rungeKuttaVelocity(f3_param, velocity, interval + interval/4.0), interval);
 		
 		double[] f4_param = addVector(position, dotProduct(f2, -0.5), f3);
-		double[] f4 = dotProduct(rungeKuttaVelocity(f4_param, velocity, interval/2.0), interval);
+		double[] f4 = dotProduct(rungeKuttaVelocity(f4_param, velocity, interval + interval/2.0), interval);
 		
 		double[] f5_param = addVector(position, dotProduct(f1, 3.0/16.0), dotProduct(f4, 9.0/16.0));
-		double[] f5 = dotProduct(rungeKuttaVelocity(f5_param, velocity, 3.0 * interval / 4.0), interval);
+		double[] f5 = dotProduct(rungeKuttaVelocity(f5_param, velocity, interval + 3.0 * interval / 4.0), interval);
 		
 		double[] f6_param = addVector(position, dotProduct(f1, -3.0/7.0), dotProduct(f2, 2.0/7.0),dotProduct(f3, 12.0/7.0), dotProduct(f4, -12.0/7.0), dotProduct(f5, 8.0/7.0));
 		double[] f6 = dotProduct(rungeKuttaVelocity(f6_param, velocity, interval), interval);
